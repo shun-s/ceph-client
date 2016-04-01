@@ -502,8 +502,11 @@ static int extra_mon_dispatch(struct ceph_client *client, struct ceph_msg *msg)
 	int type = le16_to_cpu(msg->hdr.type);
 
 	switch (type) {
+	case CEPH_MSG_FS_MAP:
+		ceph_mdsc_handle_fsmap(fsc->mdsc, msg);
+		return 0;
 	case CEPH_MSG_MDS_MAP:
-		ceph_mdsc_handle_map(fsc->mdsc, msg);
+		ceph_mdsc_handle_mdsmap(fsc->mdsc, msg);
 		return 0;
 
 	default:
@@ -520,7 +523,8 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
 	struct ceph_fs_client *fsc;
 	const u64 supported_features =
 		CEPH_FEATURE_FLOCK | CEPH_FEATURE_DIRLAYOUTHASH |
-		CEPH_FEATURE_MDSENC | CEPH_FEATURE_MDS_INLINE_DATA;
+		CEPH_FEATURE_MDSENC | CEPH_FEATURE_MDS_INLINE_DATA |
+		CEPH_FEATURE_SERVER_JEWEL;
 	const u64 required_features = 0;
 	int page_count;
 	size_t size;
@@ -538,6 +542,7 @@ static struct ceph_fs_client *create_fs_client(struct ceph_mount_options *fsopt,
 	}
 	fsc->client->extra_mon_dispatch = extra_mon_dispatch;
 
+	ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_FSMAP, 0, false);
 	if (fsopt->mds_namespace < 0) {
 		ceph_monc_want_map(&fsc->client->monc, CEPH_SUB_MDSMAP,
 				   0, true);

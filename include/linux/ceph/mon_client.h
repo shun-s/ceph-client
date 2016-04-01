@@ -60,6 +60,7 @@ struct ceph_mon_generic_request {
 
 #define CEPH_SUB_MONMAP "mommap"
 #define CEPH_SUB_OSDMAP "osdmap"
+#define CEPH_SUB_FSMAP	"fsmap"
 #define CEPH_SUB_MDSMAP "mdsmap"
 
 struct ceph_mon_client {
@@ -93,7 +94,7 @@ struct ceph_mon_client {
 		bool want;
 		u32 have; /* epoch */
 		char map[CEPH_SUB_MAP_MAXLEN];
-	} subs[3];
+	} subs[4];
 
 #ifdef CONFIG_DEBUG_FS
 	struct dentry *debugfs_file;

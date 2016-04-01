@@ -121,6 +121,8 @@ struct ceph_dir_layout {
 
 /* client <-> mds */
 #define CEPH_MSG_MDS_MAP                21
+/* FSMap subscriber (see all MDS clusters at once) */
+#define CEPH_MSG_FS_MAP                 45
 
 #define CEPH_MSG_CLIENT_SESSION         22
 #define CEPH_MSG_CLIENT_RECONNECT       23

@@ -31,6 +31,7 @@ struct ceph_mdsmap {
 	int m_num_data_pg_pools;
 	u64 *m_data_pg_pools;
 	u64 m_cas_pg_pool;
+	char *m_fs_name; 
 };
 
 static inline struct ceph_entity_addr *
@@ -58,6 +59,7 @@ static inline bool ceph_mdsmap_is_laggy(struct ceph_mdsmap *m, int w)
 
 extern int ceph_mdsmap_get_random_mds(struct ceph_mdsmap *m);
 extern struct ceph_mdsmap *ceph_mdsmap_decode(void **p, void *end);
+extern void ceph_fsmap_decode(void **p, void *end);
 extern void ceph_mdsmap_destroy(struct ceph_mdsmap *m);
 
 #endif

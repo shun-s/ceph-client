@@ -305,6 +305,7 @@ bad:
 enum {
 	CEPH_SUB_MONMAP_IDX = 0,
 	CEPH_SUB_OSDMAP_IDX,
+	CEPH_SUB_FSMAP_IDX,
 	CEPH_SUB_MDSMAP_IDX,
 };
 
@@ -314,6 +315,8 @@ static int __ceph_monc_map_idx(const char *sub)
 		return CEPH_SUB_MONMAP_IDX;
 	if (!strcmp(sub, CEPH_SUB_OSDMAP))
 		return CEPH_SUB_OSDMAP_IDX;
+	if (!strcmp(sub, CEPH_SUB_FSMAP))
+		return CEPH_SUB_FSMAP_IDX;
 	/* may subscribe to mdsmap.<int> */
 	if (!strncmp(sub, CEPH_SUB_MDSMAP, strlen(CEPH_SUB_MDSMAP)))
 		return CEPH_SUB_MDSMAP_IDX;
@@ -1145,8 +1148,9 @@ static struct ceph_msg *mon_alloc_msg(struct ceph_connection *con,
 		 * by falling through to the allocate case.
 		 */
 	case CEPH_MSG_MON_MAP:
-	case CEPH_MSG_MDS_MAP:
 	case CEPH_MSG_OSD_MAP:
+	case CEPH_MSG_FS_MAP:
+	case CEPH_MSG_MDS_MAP:
 		m = ceph_msg_new(type, front_len, GFP_NOFS, false);
 		if (!m)
 			return NULL;	/* ENOMEM--return skip == 0 */

@@ -416,8 +416,10 @@ extern void ceph_mdsc_lease_send_msg(struct ceph_mds_session *session,
 				     struct dentry *dentry, char action,
 				     u32 seq);
 
-extern void ceph_mdsc_handle_map(struct ceph_mds_client *mdsc,
-				 struct ceph_msg *msg);
+extern void ceph_mdsc_handle_mdsmap(struct ceph_mds_client *mdsc,
+				    struct ceph_msg *msg);
+extern void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc,
+				   struct ceph_msg *msg);
 
 extern struct ceph_mds_session *
 ceph_mdsc_open_export_target_session(struct ceph_mds_client *mdsc, int target);

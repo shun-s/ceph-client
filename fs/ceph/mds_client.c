@@ -3738,11 +3738,27 @@ void ceph_mdsc_destroy(struct ceph_fs_client *fsc)
 	dout("mdsc_destroy %p done\n", mdsc);
 }
 
+void ceph_mdsc_handle_fsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+{
+	void *p = msg->front.iov_base;
+	void *end = p + msg->front.iov_len;
+	u32 epoch;
+
+	ceph_decode_need(&p, end, sizeof(u32), bad);
+	epoch = ceph_decode_32(&p);
+
+	dout("handle_fsmap epoch %u\n", epoch);
+	ceph_fsmap_decode(&p, end);
+	return;
+bad:
+	pr_err("bad\n");
+	return;
+}
 
 /*
  * handle mds map update.
  */
-void ceph_mdsc_handle_map(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
+void ceph_mdsc_handle_mdsmap(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
 {
 	u32 epoch;
 	u32 maplen;
@@ -3758,12 +3774,12 @@ void ceph_mdsc_handle_map(struct ceph_mds_client *mdsc, struct ceph_msg *msg)
 		return;
 	epoch = ceph_decode_32(&p);
 	maplen = ceph_decode_32(&p);
-	dout("handle_map epoch %u len %d\n", epoch, (int)maplen);
+	dout("handle_mdsmap epoch %u len %d\n", epoch, (int)maplen);
 
 	/* do we need it? */
 	mutex_lock(&mdsc->mutex);
 	if (mdsc->mdsmap && epoch <= mdsc->mdsmap->m_epoch) {
-		dout("handle_map epoch %u <= our %u\n",
+		dout("handle_mdsmap epoch %u <= our %u\n",
 		     epoch, mdsc->mdsmap->m_epoch);
 		mutex_unlock(&mdsc->mutex);
 		return;
@@ -3848,8 +3864,11 @@ static void dispatch(struct ceph_connection *con, struct ceph_msg *msg)
 	mutex_unlock(&mdsc->mutex);
 
 	switch (type) {
+	case CEPH_MSG_FS_MAP:
+		ceph_mdsc_handle_fsmap(mdsc, msg);
+		break;
 	case CEPH_MSG_MDS_MAP:
-		ceph_mdsc_handle_map(mdsc, msg);
+		ceph_mdsc_handle_mdsmap(mdsc, msg);
 		break;
 	case CEPH_MSG_CLIENT_SESSION:
 		handle_session(s, msg);
